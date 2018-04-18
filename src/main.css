@@ -1,0 +1,21 @@
+body {
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.table {
+  user-select: none;
+}
+
+.table--with-grid .cell {
+  border: 1px solid #eee;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 8px;
+  height: 16px;
+}
