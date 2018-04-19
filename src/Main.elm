@@ -20,6 +20,11 @@ type alias Table =
     List Row
 
 
+type Mode
+    = DrawMode
+    | SelectMode
+
+
 type alias CellPos =
     { row : Maybe String, cell : Maybe String }
 
@@ -32,6 +37,7 @@ type alias Model =
     { table : Table
     , drawing : Bool
     , showGrid : Bool
+    , mode : Mode
     , char : String
     , color : String
     }
@@ -42,8 +48,10 @@ type Msg
     | StopDrawing
     | Draw CellPos
     | SetColor String
-    | ShowGrid
-    | HideGrid
+    | SetMode Mode
+    | ToggleGrid
+    | Clear
+    | ChangeChar String
 
 
 makeTable : Int -> Int -> Table
@@ -53,7 +61,8 @@ makeTable rows cells =
 
 initModel : Model
 initModel =
-    { table = makeTable 40 80
+    { table = makeTable 30 80
+    , mode = DrawMode
     , drawing = False
     , showGrid = True
     , char = "$"
@@ -61,6 +70,7 @@ initModel =
     }
 
 
+mapAt : (a -> a) -> Int -> List a -> List a
 mapAt f index =
     indexedMap
         (\i x ->
@@ -82,8 +92,17 @@ updateTable row cell char color table =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
+        Clear ->
+            { model | table = initModel.table }
+
+        ChangeChar char ->
+            { model | char = char }
+
         SetColor color ->
             { model | color = color }
+
+        SetMode mode ->
+            { model | mode = mode }
 
         StartDrawing ->
             { model | drawing = True }
@@ -91,14 +110,11 @@ update msg model =
         StopDrawing ->
             { model | drawing = False }
 
-        ShowGrid ->
-            { model | showGrid = True }
-
-        HideGrid ->
-            { model | showGrid = False }
+        ToggleGrid ->
+            { model | showGrid = not model.showGrid }
 
         Draw pos ->
-            if model.drawing then
+            if (model.drawing && model.mode == DrawMode) then
                 case pos.row of
                     Just row ->
                         case pos.cell of
@@ -137,7 +153,6 @@ cell row cellN cell =
         , style [ ( "color", cell.color ) ]
         , attribute "data-row" (toString row)
         , attribute "data-cell" (toString cellN)
-        , on "mousemove" (Json.map Draw decodePos)
         ]
         [ text cell.cell ]
 
@@ -155,35 +170,73 @@ table model =
             [ classList
                 [ ( "table", True )
                 , ( "table--with-grid", model.showGrid )
+                , ( "table--selectable", model.mode == SelectMode )
                 ]
+            , onMouseDown StartDrawing
+            , onMouseUp StopDrawing
+            , onMouseLeave StopDrawing
+            , on "mousemove" (Json.map Draw decodePos)
             ]
 
 
-view : Model -> Html Msg
-view model =
-    div [ onMouseDown StartDrawing, onMouseUp StopDrawing ]
-        [ h1 [] [ text "ASCII ART TOOL" ]
-        , table model
-        , footer []
+toolItem : Bool -> List (Html msg) -> Html msg
+toolItem active =
+    li [ classList [ ( "tool-item", True ), ( "tool-item--active", active ) ] ]
+
+
+tools : Model -> Html Msg
+tools model =
+    menu [ class "tools" ]
+        [ toolItem (model.mode == DrawMode)
+            [ button [ title "Draw mode", onClick (SetMode DrawMode) ]
+                [ text "✍"
+                ]
+            ]
+        , toolItem (model.mode == SelectMode)
+            [ button [ title "Select mode", onClick (SetMode SelectMode) ]
+                [ text "\x1F91A"
+                ]
+            ]
+        , toolItem model.showGrid
+            [ button [ title "Toggle grid", onClick ToggleGrid ]
+                [ text "❖"
+                ]
+            ]
+        , toolItem False
             [ input
-                [ type_ "color"
+                [ class "char-input"
+                , title "Change character"
+                , Html.Attributes.value model.char
+                , onInput ChangeChar
+                , maxlength 1
+                ]
+                []
+            ]
+        , toolItem False
+            [ input
+                [ class "color-input"
+                , type_ "color"
+                , title "Select color"
                 , Html.Attributes.value model.color
                 , onInput SetColor
                 ]
                 []
-            , input
-                [ type_ "checkbox"
-                , onCheck
-                    (\checked ->
-                        if checked then
-                            ShowGrid
-                        else
-                            HideGrid
-                    )
-                , checked model.showGrid
+            ]
+        , toolItem False
+            [ button [ title "Erase all", onClick Clear ]
+                [ text "🚫"
                 ]
-                []
-            , span [] [ text "show grid" ]
+            ]
+        ]
+
+
+view : Model -> Html Msg
+view model =
+    main_ []
+        [ h1 [] [ text "🎨 ASCII ART TOOL" ]
+        , section [ class "container" ]
+            [ table model
+            , tools model
             ]
         ]
 

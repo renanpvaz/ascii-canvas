@@ -1,14 +1,119 @@
+/* latin-ext */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Inconsolata Regular'), local('Inconsolata-Regular'), url(https://fonts.gstatic.com/s/inconsolata/v16/QldKNThLqRwH-OJ1UHjlKGlX5qhExfHwNJU.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Inconsolata Regular'), local('Inconsolata-Regular'), url(https://fonts.gstatic.com/s/inconsolata/v16/QldKNThLqRwH-OJ1UHjlKGlZ5qhExfHw.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 body {
-  font-family: monospace;
+  font-family: 'Inconsolata', monospace;
   font-size: 14px;
 }
 
+main {
+  max-width: 850px;
+  margin: auto;
+}
+
+button {
+  padding: 0;
+  background: 0;
+  border: 0;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+input {
+  border: 0;
+  outline: 0;
+  height: 30px;
+  box-sizing: border-box;
+  width: 30px;
+  background: transparent;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+}
+
 .table {
+  cursor: pointer;
   user-select: none;
+  min-width: 800px;
+}
+
+.table--selectable {
+  user-select: text;
 }
 
 .table--with-grid .cell {
   border: 1px solid #eee;
+}
+
+.container {
+  display: flex;
+  list-style: none;
+}
+
+.tools {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  margin: 0;
+  padding: 12px 0px 0 12px;
+}
+
+.tool-item {
+  padding: 4px;
+  margin-bottom: 8px;
+  transition: color .4s, background 140ms ease-in;
+  font-size: 20px;
+  cursor: pointer;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-item--active {
+  color: #3b99fc;
+}
+
+.tool-item--active,
+.tool-item:hover {
+  background: rgba(58, 56, 52, .08);
+  border-radius: 4px;
+}
+
+.char-input {
+  font-size: 18px;
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 1px solid #aaa;
+  width: 24px;
+  text-align: center;
+  transition: box-shadow ease .2s
+}
+
+.char-input:focus {
+  outline: none;
+  border-bottom-color: #3b99fc;
+  box-shadow: 0 2px 0px rgba(59, 153, 252, 0.38);
 }
 
 .row {
