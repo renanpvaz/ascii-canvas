@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Json.Decode exposing (..)
-import List exposing (indexedMap, map, repeat)
+import List exposing (..)
 import Json.Decode as Json
 
 
@@ -49,14 +49,13 @@ type Msg
     | Draw CellPos
     | SetColor String
     | SetMode Mode
-    | ToggleGrid
     | Clear
     | ChangeChar String
 
 
 makeTable : Int -> Int -> Table
 makeTable rows cells =
-    repeat rows (repeat cells (Cell "" "black"))
+    repeat rows (repeat cells (Cell " " "black"))
 
 
 initModel : Model
@@ -66,7 +65,7 @@ initModel =
     , drawing = False
     , showGrid = True
     , char = "$"
-    , color = "black"
+    , color = "#ff2600"
     }
 
 
@@ -89,6 +88,14 @@ updateTable row cell char color table =
         table
 
 
+chunk : Int -> String -> List String
+chunk n str =
+    if String.length str > 0 then
+        [ String.left n str ] ++ (chunk n str)
+    else
+        []
+
+
 update : Msg -> Model -> Model
 update msg model =
     case msg of
@@ -109,9 +116,6 @@ update msg model =
 
         StopDrawing ->
             { model | drawing = False }
-
-        ToggleGrid ->
-            { model | showGrid = not model.showGrid }
 
         Draw pos ->
             if (model.drawing && model.mode == DrawMode) then
@@ -164,19 +168,35 @@ row rowN =
 
 table : Model -> Html Msg
 table model =
-    .table model
-        |> indexedMap row
-        |> div
-            [ classList
-                [ ( "table", True )
-                , ( "table--with-grid", model.showGrid )
-                , ( "table--selectable", model.mode == SelectMode )
-                ]
-            , onMouseDown StartDrawing
-            , onMouseUp StopDrawing
-            , onMouseLeave StopDrawing
-            , on "mousemove" (Json.map Draw decodePos)
+    div
+        [ classList
+            [ ( "table", True )
+            , ( "table--with-grid", model.showGrid )
+            , ( "table--selectable", model.mode == SelectMode )
             ]
+        , onMouseDown StartDrawing
+        , onMouseUp StopDrawing
+        , onMouseLeave StopDrawing
+        , on "mousemove" (Json.map Draw decodePos)
+        ]
+        (case model.mode of
+            DrawMode ->
+                .table model |> indexedMap row
+
+            SelectMode ->
+                textTable model
+        )
+
+
+textCell { cell, color } =
+    span [ class "cell cell--selectable", style [ ( "color", color ) ] ] [ text cell ]
+
+
+textTable =
+    .table
+        >> List.map (\row -> List.map textCell row)
+        >> intersperse ([ br [] [] ])
+        >> foldr (++) []
 
 
 toolItem : Bool -> List (Html msg) -> Html msg
@@ -197,11 +217,6 @@ tools model =
                 [ text "\x1F91A"
                 ]
             ]
-        , toolItem model.showGrid
-            [ button [ title "Toggle grid", onClick ToggleGrid ]
-                [ text "❖"
-                ]
-            ]
         , toolItem False
             [ input
                 [ class "char-input"
@@ -209,6 +224,7 @@ tools model =
                 , Html.Attributes.value model.char
                 , onInput ChangeChar
                 , maxlength 1
+                , style [ ( "color", model.color ) ]
                 ]
                 []
             ]
@@ -233,7 +249,7 @@ tools model =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ h1 [] [ text "🎨 ASCII ART TOOL" ]
+        [ h1 [] [ text "🎨 ASCII Canvas" ]
         , section [ class "container" ]
             [ table model
             , tools model

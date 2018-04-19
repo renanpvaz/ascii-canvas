@@ -59,10 +59,6 @@ input {
   user-select: text;
 }
 
-.table--with-grid .cell {
-  border: 1px solid #eee;
-}
-
 .container {
   display: flex;
   list-style: none;
@@ -123,4 +119,11 @@ input {
 .cell {
   width: 8px;
   height: 16px;
+  display: inline-block;
+  white-space: pre;
+  border: 1px solid #eee;
+}
+
+.cell--selectable {
+  border: 0;
 }
