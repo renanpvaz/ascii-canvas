@@ -35,7 +35,7 @@ type alias CellPos2 =
 
 type alias Model =
     { table : Table
-    , drawing : Bool
+    , dragging : Bool
     , showGrid : Bool
     , mode : Mode
     , char : String
@@ -44,9 +44,9 @@ type alias Model =
 
 
 type Msg
-    = StartDrawing
-    | StopDrawing
-    | Draw CellPos
+    = StartDragging
+    | StopDragging
+    | Move CellPos
     | SetColor String
     | SetMode Mode
     | Clear
@@ -57,7 +57,7 @@ initModel : Model
 initModel =
     { table = makeTable 30 80
     , mode = DrawMode
-    , drawing = False
+    , dragging = False
     , showGrid = True
     , char = "$"
     , color = "#ff2600"
@@ -87,14 +87,14 @@ update msg model =
         SetMode mode ->
             { model | mode = mode }
 
-        StartDrawing ->
-            { model | drawing = True }
+        StartDragging ->
+            { model | dragging = True }
 
-        StopDrawing ->
-            { model | drawing = False }
+        StopDragging ->
+            { model | dragging = False }
 
-        Draw pos ->
-            if (model.drawing && model.mode == DrawMode) then
+        Move pos ->
+            if canDraw model then
                 case pos.row of
                     Just row ->
                         case pos.cell of
@@ -116,6 +116,11 @@ update msg model =
                         model
             else
                 model
+
+
+canDraw : Model -> Bool
+canDraw model =
+    (model.dragging && model.mode == DrawMode)
 
 
 mapAt : (a -> a) -> Int -> List a -> List a
@@ -166,11 +171,12 @@ table model =
             , ( "table--with-grid", model.showGrid )
             , ( "table--selectable", model.mode == SelectMode )
             ]
-        , onMouseDown StartDrawing
-        , onMouseUp StopDrawing
-        , onMouseLeave StopDrawing
-        , on "mousemove" (Json.map Draw decodePos)
-        , on "click" (Json.map Draw decodePos)
+        , onMouseDown StartDragging
+        , onMouseUp StopDragging
+
+        -- , onMouseLeave StopDragging
+        , on "mousemove" (Json.map Move decodePos)
+        , on "click" (Json.map Move decodePos)
         ]
         (case model.mode of
             DrawMode ->
