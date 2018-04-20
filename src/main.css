@@ -129,3 +129,32 @@ input {
   border: 0;
   padding: 1px;
 }
+
+.em {
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.em--md {
+  height: 32px;
+  width: 32px;
+}
+
+.em--artist-pallete {
+  background-image: url('assets/ap-artist-palette.png')
+}
+
+.em--raised-hand {
+  background-image: url('assets/ap-raised-hand.png');
+}
+
+.em--writing-hand {
+  background-image: url('assets/ap-writing-hand.png');
+}
+
+.em--prohibited {
+  background-image: url('assets/ap-prohibited.png');
+}

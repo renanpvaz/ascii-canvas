@@ -209,14 +209,16 @@ tools : Model -> Html Msg
 tools model =
     menu [ class "tools" ]
         [ toolItem (model.mode == DrawMode)
-            [ button [ title "Draw mode", onClick (SetMode DrawMode) ]
-                [ text "✍"
-                ]
+            [ button [ class "em em--writing-hand"
+                , title "Draw mode"
+                , onClick (SetMode DrawMode) ]
+                []
             ]
         , toolItem (model.mode == SelectMode)
-            [ button [ title "Select mode", onClick (SetMode SelectMode) ]
-                [ text "\x1F91A"
-                ]
+            [ button [ class "em em--raised-hand"
+            , title "Select mode"
+            , onClick (SetMode SelectMode) ]
+                []
             ]
         , toolItem False
             [ input
@@ -240,9 +242,10 @@ tools model =
                 []
             ]
         , toolItem False
-            [ button [ title "Erase all", onClick Clear ]
-                [ text "🚫"
-                ]
+            [ button [ class "em em--prohibited"
+            , title "Erase all"
+            , onClick Clear ]
+                []
             ]
         ]
 
@@ -250,7 +253,9 @@ tools model =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ h1 [] [ text "🎨 ASCII Canvas" ]
+        [ h1 [] 
+        [ div [ class "em em--artist-pallete em--md" ] []
+        , text " AII Canvas" ]
         , section [ class "container" ]
             [ table model
             , tools model
