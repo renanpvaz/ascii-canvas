@@ -53,11 +53,6 @@ type Msg
     | ChangeChar String
 
 
-makeTable : Int -> Int -> Table
-makeTable rows cells =
-    repeat rows (repeat cells (Cell " " "black"))
-
-
 initModel : Model
 initModel =
     { table = makeTable 30 80
@@ -69,31 +64,12 @@ initModel =
     }
 
 
-mapAt : (a -> a) -> Int -> List a -> List a
-mapAt f index =
-    indexedMap
-        (\i x ->
-            if i == index then
-                f x
-            else
-                x
-        )
-
-
 updateTable : Int -> Int -> String -> String -> Table -> Table
 updateTable row cell char color table =
     mapAt
         (mapAt (\c -> { color = color, cell = char }) cell)
         row
         table
-
-
-chunk : Int -> String -> List String
-chunk n str =
-    if String.length str > 0 then
-        [ String.left n str ] ++ (chunk n str)
-    else
-        []
 
 
 update : Msg -> Model -> Model
@@ -142,6 +118,22 @@ update msg model =
                 model
 
 
+mapAt : (a -> a) -> Int -> List a -> List a
+mapAt f index =
+    indexedMap
+        (\i x ->
+            if i == index then
+                f x
+            else
+                x
+        )
+
+
+makeTable : Int -> Int -> Table
+makeTable rows cells =
+    repeat rows (repeat cells (Cell " " "black"))
+
+
 decodePos : Decoder CellPos
 decodePos =
     field "target" <|
@@ -178,6 +170,7 @@ table model =
         , onMouseUp StopDrawing
         , onMouseLeave StopDrawing
         , on "mousemove" (Json.map Draw decodePos)
+        , on "click" (Json.map Draw decodePos)
         ]
         (case model.mode of
             DrawMode ->
@@ -188,10 +181,12 @@ table model =
         )
 
 
+textCell : Cell -> Html Msg
 textCell { cell, color } =
     span [ class "cell cell--selectable", style [ ( "color", color ) ] ] [ text cell ]
 
 
+textTable : Model -> List (Html Msg)
 textTable =
     .table
         >> List.map (\row -> List.map textCell row)

@@ -57,6 +57,7 @@ input {
 
 .table--selectable {
   user-select: text;
+  cursor: default;
 }
 
 .container {
@@ -126,4 +127,5 @@ input {
 
 .cell--selectable {
   border: 0;
+  padding: 1px;
 }
